@@ -1,0 +1,7 @@
+FROM alpine:3.21.3
+
+WORKDIR /service
+
+COPY ./bin/date-service .
+
+ENTRYPOINT [ "./date-service" ]

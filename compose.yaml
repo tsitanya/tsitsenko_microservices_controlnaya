@@ -1,0 +1,22 @@
+services:
+  loadbalancer:
+    image: nginx:stable-alpine3.20
+    ports:
+      - 8080:80
+    volumes:
+      - ./templates:/etc/nginx/templates
+      - ./frontend:/frontend
+  
+  core-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-Core
+    expose:
+      - 80
+
+  date-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-Date
+    expose:
+      - 80
