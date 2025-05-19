@@ -1,0 +1,53 @@
+upstream core-upstream {
+   server core-service:80;
+}
+
+upstream date-upstream {
+   server date-service:80;
+}
+
+
+map $http_x_rpc_method $app_route {
+   hostnames;
+   
+   default core-upstream;
+   date.*  date-upstream;
+}
+
+server {
+   listen 80;
+
+    location / {
+        root /frontend;
+        index index.html;
+    }
+
+   location /rpc {
+      client_max_body_size 48;
+      client_body_timeout 1s;
+
+      if ($request_method != POST) {
+         return 405;
+      }
+
+      if ($http_x_client_id != "date-service-client") {
+         return 401;
+      }
+
+      if ($http_client_credentials != "") {
+         return 401;
+      }
+
+      if ($http_x_rpc_method = "") {
+         return 400;
+      }
+
+      if ($content_type != "application/json") {
+        return 400;
+      }
+
+      proxy_pass http://$app_route;
+
+   }
+
+}
